@@ -8,7 +8,12 @@
 
 #import "AppDelegate.h"
 
+#import "MainViewController.h"
+
 @implementation AppDelegate
+
+@synthesize mainNavi;
+@synthesize splashView;
 
 - (void)dealloc
 {
@@ -16,13 +21,57 @@
     [super dealloc];
 }
 
+
+- (void)showSplashScreen
+{
+    if(isIPhone5())
+    {
+        self.splashView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Default-568h@2x.png"]];
+        [self.splashView setFrame:[[UIScreen mainScreen] bounds]];
+    }
+    else
+    {
+        self.splashView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Default.png"]];
+        [self.splashView setFrame:[[UIScreen mainScreen] bounds]];
+    }
+    
+	[self.window addSubview:self.splashView];
+    [self.window bringSubviewToFront:self.splashView];
+}
+
+
+- (void)removeSplashScreen
+{
+    [self.splashView removeFromSuperview];
+    [self.splashView release];
+}
+
+- (void)splashScreenAddActivity
+{
+    const float x = (320)/2-10;
+	const float y =  100;
+    
+    UIActivityIndicatorView *act = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(x, y, 20, 20)];
+	[act startAnimating];
+	[act setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleWhiteLarge];
+	[self.splashView addSubview:act];
+	[act release];
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     // Override point for customization after application launch.
-    /*self.viewController = [[[ViewController alloc] initWithNibName:@"ViewController" bundle:nil] autorelease];
-    self.window.rootViewController = self.viewController;*/
+    
+    MainViewController *main = [[[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil] autorelease];
+    
+    self.mainNavi = [[[UINavigationController alloc] initWithRootViewController:main]autorelease];
+    [self.mainNavi setNavigationBarHidden:YES];
+    
+    self.window.rootViewController = self.mainNavi;
+    
     [self.window makeKeyAndVisible];
+    [self showSplashScreen];
     return YES;
 }
 

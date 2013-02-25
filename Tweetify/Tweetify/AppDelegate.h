@@ -13,4 +13,11 @@
 
 @property (strong, nonatomic) UIWindow *window;
 
+@property (strong, nonatomic) UIImageView* splashView;
+@property (strong, nonatomic) UINavigationController *mainNavi;
+
+- (void)removeSplashScreen;
+- (void)splashScreenAddActivity;
+- (void)showSplashScreen;
+
 @end
