@@ -37,7 +37,7 @@ static NSArray *expressions = nil;
 	// setup regular expressions that define where buttons will be created
 	expressions = [[NSArray alloc] initWithObjects:
 			@"(@[a-zA-Z0-9_]+)", // screen names
-			@"(#[a-zA-Z0-9_-]+)", // hash tags
+			//@"(#[a-zA-Z0-9_-]+)", // hash tags
 			@"([hH][tT][tT][pP][sS]?:\\/\\/[^ ,'\">\\]\\)]*[^\\. ,'\">\\]\\)])", // hyperlinks
 			nil];
 }

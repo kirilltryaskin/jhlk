@@ -281,23 +281,30 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     int rowIndex = indexPath.row;
-    [[NSBundle mainBundle] loadNibNamed:@"customProfileCell" owner:self options:nil];
     
-    UITableViewCell *cell = jobCell;
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    static NSString *CellIdentifier = @"ApplicationCellProfile";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    
+    if (cell == nil) {
+        [[NSBundle mainBundle] loadNibNamed:@"customProfileCell" owner:self options:nil];
+        cell = jobCell;
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    
     self.jobCell = nil;
     
     self.mrRemoveTweetBtn.tag = rowIndex;
     self.mrHeaderSectionButton.tag = rowIndex;
     
-    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        self.mrCellAva.image = [[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"ava"];
+        self.mrCellTime.text = [self mrGetTimeStrFromDate:[[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"created"]];
+    });
+        
     self.mrCellName.text = [[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"name"];
     self.mrCellUserName.text = [NSString stringWithFormat:@"%@%@",@"@",[[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"username"]];
     self.mrCellText.text = [[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"text"];
     
-    self.mrCellAva.image = [[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"ava"];
-        
-    self.mrCellTime.text = [self mrGetTimeStrFromDate:[[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"created"]];
     self.mrCellActionView.tag = 3;
         
     if([[[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"username"] isEqualToString:self.account.username])

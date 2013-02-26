@@ -34,7 +34,15 @@
     UITableViewCell *jobCell;
     
     UIImage *uploadedImage;
+    
+    int mrLinkLen;
 }
+
+@property int mrLinkLen;
+
+-(NSArray *)mrGetReplarray:(NSString *)text;
+-(void)loadUserInformation;
+
 @property (retain, nonatomic) IBOutlet UIButton *mrDeleteTweetBtn;
 @property (retain, nonatomic) IBOutlet UIButton *mrReloader1;
 - (IBAction)mrReloader1action:(id)sender;
@@ -58,9 +66,7 @@
 @property (retain, nonatomic) IBOutlet UILabel *mrAccountFollowers;
 @property (retain, nonatomic) IBOutlet UILabel *mrAccountTweets;
 
-
 @property (nonatomic, assign) IBOutlet UITableViewCell *jobCell;
-
 
 @property (nonatomic, retain) NSMutableArray *mrTimelineItems;
 @property (nonatomic, retain) NSMutableArray *mrMentionsItems;
@@ -101,10 +107,10 @@
 -(void)mrGetTwDataUserTweets:(ACAccount*)account;
 -(void)mrGetUserData:(ACAccount*)account;
 -(void)mrGetUserDataStreem:(ACAccount*)account;
+-(void)mrGetAccessToTwitterAccountsAggain;
 
 @property (retain, nonatomic) IBOutlet UIWebView *mrAccountBG;
 - (IBAction)mrViewTweetView:(id)sender;
-
 -(NSString *)mrGetTimeStrFromDate:(NSString*)date;
 -(BOOL)textFieldShouldReturn:(UITextField *)textField;
 
@@ -120,11 +126,10 @@
 @property (retain, nonatomic) IBOutlet UITextView *mrAddTwittText;
 @property (retain, nonatomic) IBOutlet UIButton *mrRemoveTweetBtn;
 @property (retain, nonatomic) IBOutlet UIWebView *mrAccountAva;
+@property (retain, nonatomic) IBOutlet UIButton *mrPictureSelector;
 
 - (IBAction)mrSendTweetAction:(id)sender;
-@property (retain, nonatomic) IBOutlet UIButton *mrPictureSelector;
 - (IBAction)mrSelectPictureAction:(id)sender;
-
 
 - (void)mrSendNewAction;
 - (void)mrHideTweetView;
@@ -133,14 +138,14 @@
 
 
 - (IBAction)mrGoToSettings:(id)sender;
-
--(void)gotoUserPage:(UIGestureRecognizer *)gestureRecognizer;
+- (void)gotoUserPage:(UIGestureRecognizer *)gestureRecognizer;
 - (IBAction)mrGoToProfile:(id)sender;
 
 -(UIImage *)mrResizePicture:(UIImage *)inputImage;
 
 -(void)mrTweetCounterAction;
 -(void)textfieldChangeText;
+-(void)mrTwitLen:(ACAccount*)account;
 
 
 @end

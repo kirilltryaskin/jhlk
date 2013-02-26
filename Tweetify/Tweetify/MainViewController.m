@@ -29,6 +29,7 @@
 @synthesize mrAccountTweets;
 @synthesize uploadedImage;
 @synthesize mrUserFriends;
+@synthesize mrLinkLen;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -104,6 +105,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    self.mrLinkLen = 23;
+    
     self.mrReloader1.hidden = YES;
     self.mrReloader2.hidden = YES;
     self.mrReloader3.hidden = YES;
@@ -181,7 +184,6 @@
 }
 
 
-
 #pragma mark - Table functions
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -223,11 +225,19 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     int rowIndex = indexPath.row;
-    [[NSBundle mainBundle] loadNibNamed:@"customCell" owner:self options:nil];
     
-    UITableViewCell *cell = jobCell;
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    static NSString *CellIdentifier = @"ApplicationCell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    
+    if (cell == nil) {
+
+       [[NSBundle mainBundle] loadNibNamed:@"customCell" owner:self options:nil];
+       cell = jobCell;
+       cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    
     self.jobCell = nil;
+    
     
     self.mrRemoveTweetBtn.tag = rowIndex;
     self.mrReplyTweetBtn.tag = rowIndex;
@@ -235,9 +245,19 @@
     
     //[self.mrCellAva loadHTMLString:nil baseURL:nil];
     
-    NSLog(@"table cell init");
     if(tableView == self.mrTimeLineTable)
     {
+        if([[[self.mrTimelineItems objectAtIndex:rowIndex]objectForKey:@"username"] isEqualToString:self.account.username])
+            self.mrReplyTweetBtn.hidden = YES;
+        else
+            self.mrReplyTweetBtn.hidden = NO;
+            
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            self.mrCellAva.image = [[self.mrTimelineItems objectAtIndex:rowIndex]objectForKey:@"ava"];
+            self.mrCellTime.text = [self mrGetTimeStrFromDate:[[self.mrTimelineItems objectAtIndex:rowIndex]objectForKey:@"created"]];
+        });
+        
         cell.tag = 1;
         self.mrCellName.text = [[self.mrTimelineItems objectAtIndex:rowIndex]objectForKey:@"name"];
         self.mrCellUserName.text = [NSString stringWithFormat:@"%@%@",@"@",[[self.mrTimelineItems objectAtIndex:rowIndex]objectForKey:@"username"]];
@@ -246,10 +266,7 @@
         /*NSURLRequest *urlRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:[[self.mrTimelineItems objectAtIndex:rowIndex]objectForKey:@"ava"]]];
         [self.mrCellAva loadRequest:urlRequest];*/
         
-        self.mrCellAva.image = [[self.mrTimelineItems objectAtIndex:rowIndex]objectForKey:@"ava"];
-        
-        
-        self.mrCellTime.text = [self mrGetTimeStrFromDate:[[self.mrTimelineItems objectAtIndex:rowIndex]objectForKey:@"created"]];
+       
         self.mrCellActionView.tag = 1;
         
         
@@ -261,17 +278,25 @@
     }
     else if(tableView == self.mrMentionsTable)
     {
+        if([[[self.mrMentionsItems objectAtIndex:rowIndex]objectForKey:@"username"] isEqualToString:self.account.username])
+            self.mrReplyTweetBtn.hidden = YES;
+        else
+            self.mrReplyTweetBtn.hidden = NO;
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            self.mrCellAva.image = [[self.mrMentionsItems objectAtIndex:rowIndex]objectForKey:@"ava"];
+            self.mrCellTime.text = [self mrGetTimeStrFromDate:[[self.mrMentionsItems objectAtIndex:rowIndex]objectForKey:@"created"]];
+        });
+
         cell.tag = 2;
         self.mrCellName.text = [[self.mrMentionsItems objectAtIndex:rowIndex]objectForKey:@"name"];
         self.mrCellUserName.text = [NSString stringWithFormat:@"%@%@",@"@",[[self.mrMentionsItems objectAtIndex:rowIndex]objectForKey:@"username"]];
         self.mrCellText.text = [[self.mrMentionsItems objectAtIndex:rowIndex]objectForKey:@"text"];
         
-        self.mrCellAva.image = [[self.mrMentionsItems objectAtIndex:rowIndex]objectForKey:@"ava"];
-        
         /*NSURLRequest *urlRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:[[self.mrMentionsItems objectAtIndex:rowIndex]objectForKey:@"ava"]]];
         [self.mrCellAva loadRequest:urlRequest];*/
         
-        self.mrCellTime.text = [self mrGetTimeStrFromDate:[[self.mrMentionsItems objectAtIndex:rowIndex]objectForKey:@"created"]];
+        
         self.mrCellActionView.tag = 2;
         
         if([[[self.mrMentionsItems objectAtIndex:rowIndex]objectForKey:@"username"] isEqualToString:self.account.username])
@@ -281,17 +306,24 @@
     }
     else if(tableView == self.mrUserTweetsTable)
     {
+        if([[[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"username"] isEqualToString:self.account.username])
+            self.mrReplyTweetBtn.hidden = YES;
+        else
+            self.mrReplyTweetBtn.hidden = NO;
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            self.mrCellAva.image = [[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"ava"];
+            self.mrCellTime.text = [self mrGetTimeStrFromDate:[[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"created"]];
+        });
+            
         cell.tag = 3;
         self.mrCellName.text = [[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"name"];
         self.mrCellUserName.text = [NSString stringWithFormat:@"%@%@",@"@",[[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"username"]];
         self.mrCellText.text = [[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"text"];
         
-        self.mrCellAva.image = [[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"ava"];
-        
         /*NSURLRequest *urlRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:[[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"ava"]]];
         [self.mrCellAva loadRequest:urlRequest];*/
         
-        self.mrCellTime.text = [self mrGetTimeStrFromDate:[[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"created"]];
         self.mrCellActionView.tag = 3;
         
         if([[[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"username"] isEqualToString:self.account.username])
@@ -387,6 +419,58 @@
     return returnSTR;
 }
 
+
+-(void)mrGetAccessToTwitterAccountsAggain
+{
+    // Get access to their accounts
+    self.accountStore = [[[ACAccountStore alloc] init] autorelease];
+    ACAccountType *accountTypeTwitter = [self.accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
+    [self.accountStore requestAccessToAccountsWithType:accountTypeTwitter
+                                 withCompletionHandler:^(BOOL granted, NSError *error)
+     {
+         if (granted && !error)
+         {
+             dispatch_sync(dispatch_get_main_queue(), ^{
+                 self.accounts = [self.accountStore accountsWithAccountType:accountTypeTwitter];
+                 
+                 if (self.accounts.count == 0)
+                 {
+                     [[[[UIAlertView alloc] initWithTitle:nil
+                                                  message:@"Please add a Twitter account in the Settings app"
+                                                 delegate:nil
+                                        cancelButtonTitle:@"OK"
+                                        otherButtonTitles:nil] autorelease] show];
+                 }
+                 else
+                 {
+                                              // Let them select the account they want to use
+                         UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Select your Twitter account:"
+                                                                             delegate:self
+                                                                    cancelButtonTitle:nil
+                                                               destructiveButtonTitle:nil
+                                                                    otherButtonTitles:nil] autorelease];
+                         
+                         for (ACAccount* account in self.accounts)
+                         {
+                             [sheet addButtonWithTitle:account.accountDescription];
+                         }
+                         
+                         sheet.tag = 5;
+                         
+                         [sheet showInView:self.view];
+                 }
+             });
+         }
+         else
+         {
+             dispatch_sync(dispatch_get_main_queue(), ^{
+                 NSString* message = [NSString stringWithFormat:@"Error getting access to accounts : %@", [error localizedDescription]];
+                 [[[[UIAlertView alloc] initWithTitle:nil message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease] show];
+             });
+         }
+     }];
+}
+
 -(void)mrGetAccessToTwitterAccounts
 {
     // Get access to their accounts
@@ -410,21 +494,45 @@
                     }
                     else
                     {
-                        // Let them select the account they want to use
-                        UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Select your Twitter account:"
-                                delegate:self
-                                cancelButtonTitle:nil
-                                destructiveButtonTitle:nil
-                                otherButtonTitles:nil] autorelease];
-                                             
-                        for (ACAccount* account in self.accounts)
+                        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+                        BOOL found = NO;
+                        
+                        if(![[userDefaults objectForKey:@"mr.user.acc.name"] isEqualToString:@""])
                         {
-                          [sheet addButtonWithTitle:account.accountDescription];
+                            for(int i=0; i < self.accounts.count; i++)
+                            {
+                                    ACAccount *oneAccount = [self.accounts objectAtIndex:i];
+                                
+                                    if([oneAccount.username isEqualToString:[userDefaults objectForKey:@"mr.user.acc.name"]])
+                                    {
+                                        self.account = [self.accounts objectAtIndex:i];
+                                        found = YES;
+                                    }
+                            }
                         }
-                                             
-                        sheet.tag = 5;
-                                             
-                        [sheet showInView:self.view];
+                        
+                        if(found)
+                        {
+                             [self loadUserInformation];
+                        }
+                        else
+                        {
+                            // Let them select the account they want to use
+                            UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Select your Twitter account:"
+                                                                                delegate:self
+                                                                       cancelButtonTitle:nil
+                                                                  destructiveButtonTitle:nil
+                                                                       otherButtonTitles:nil] autorelease];
+                            
+                            for (ACAccount* account in self.accounts)
+                            {
+                                [sheet addButtonWithTitle:account.accountDescription];
+                            }
+                            
+                            sheet.tag = 5;
+                            
+                            [sheet showInView:self.view];
+                        } 
                     }
                 });
         }
@@ -442,6 +550,42 @@
 
 #pragma mark - UIActionSheetDelegate
 
+-(void)loadUserInformation
+{
+    self.mrTimelineItems = nil;
+    self.mrMentionsItems = nil;
+    self.mrUserTweets = nil;
+    self.mrUserFriends = nil;
+    
+    self.mrReloader1.hidden = YES;
+    self.mrReloader2.hidden = YES;
+    self.mrReloader3.hidden = YES;
+    
+    [self.stream stop];
+    [self.stream release];
+    
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    [appDelegate splashScreenAddActivity];
+    
+    [self mrGetTwDataTimeLine:self.account];
+    [self mrGetTwDataMentions:self.account];
+    [self mrGetTwDataUserTweets:self.account];
+    
+    [self mrGetUserData:self.account];
+    [self mrGetUserFriends:self.account];
+    
+    [self mrTwitLen:self.account];
+    
+    //NSLog(@"--- account --- %@",self.account);
+    
+    self.stream = [[[TSUserStream alloc] initWithAccount:self.account
+                                             andDelegate:self
+                                           andAllReplies:NO
+                                        andAllFollowings:YES] autorelease];
+    if (self.stream)
+        [self.stream start];
+}
+
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
     
     
@@ -451,30 +595,14 @@
         {
             if (buttonIndex < self.accounts.count)
             {
-                [self.stream stop];
-                
-                [self.stream release];
-                
+                               
                 self.account = [self.accounts objectAtIndex:buttonIndex];
                 
-                AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-                [appDelegate splashScreenAddActivity];
+                NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+                [userDefaults setObject:self.account.username forKey:@"mr.user.acc.name"];
+                [userDefaults synchronize];
                 
-                [self mrGetTwDataTimeLine:self.account];
-                [self mrGetTwDataMentions:self.account];
-                [self mrGetTwDataUserTweets:self.account];
-                
-                [self mrGetUserData:self.account];
-                [self mrGetUserFriends:self.account];
-                
-                //NSLog(@"--- account --- %@",self.account);
-                
-                self.stream = [[[TSUserStream alloc] initWithAccount:self.account
-                                                         andDelegate:self
-                                                       andAllReplies:NO
-                                                    andAllFollowings:YES] autorelease];
-                if (self.stream)
-                    [self.stream start];
+                [self loadUserInformation];
             }
         }
         break;
@@ -528,6 +656,31 @@
 
 
 #pragma mark - REST API
+
+-(void)mrTwitLen:(ACAccount*)account{
+    
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1/help/configuration.json"]];
+    TWRequest *request = [[TWRequest alloc] initWithURL:url parameters:nil requestMethod:TWRequestMethodGET];
+    [request setAccount:account];
+    [request performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error)
+     {
+         if (responseData)
+         {
+             NSError *error;
+             NSDictionary *mrConfig = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&error];
+             
+             self.mrLinkLen = [[NSString stringWithFormat:@"%@",[mrConfig objectForKey:@"short_url_length_https"]]integerValue];
+ 
+             
+             [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+         }
+         
+     }];
+    
+    [request release];
+}
 
 -(void)mrGetUserFriends:(ACAccount*)account{
     
@@ -695,6 +848,47 @@
 }
 
 
+-(NSArray *)mrGetReplarray:(NSString *)text
+{
+    NSMutableArray *replarray = [[NSMutableArray alloc]init];;
+    NSString *tweetText = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    
+
+    NSRange rangeUser = [tweetText rangeOfString:@"@"];
+    
+    if(rangeUser.location != NSNotFound)
+    {
+        NSString *bufText = tweetText;
+        
+        while (rangeUser.location != NSNotFound)
+        {
+            bufText = [bufText substringFromIndex:rangeUser.location];
+            
+            NSRange range = [bufText rangeOfString:@" "];
+            NSString *name;
+            
+            if (range.location != NSNotFound)
+            {
+                name = [[[NSString stringWithFormat:@"%@",bufText] substringToIndex:range.location]stringByReplacingOccurrencesOfString:@":" withString:@""];
+                bufText = [[[NSString stringWithFormat:@"%@",bufText] substringFromIndex:range.location]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+            }
+            else
+            {               
+                name = [[[NSString stringWithFormat:@"%@",bufText] substringToIndex:bufText.length] stringByReplacingOccurrencesOfString:@":" withString:@""];
+                bufText = @"";
+            }
+            
+            [replarray addObject:name];
+            
+            rangeUser = [bufText rangeOfString:@"@"];
+        }
+    }
+    NSArray *resultArray = [NSArray arrayWithArray:replarray];
+    [replarray release];
+    return resultArray;
+}
+
+
 -(void)mrGetTwDataTimeLine:(ACAccount*)account{
     
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
@@ -727,9 +921,10 @@
                                                                 [[oneItemFrom objectForKey:@"user"]objectForKey:@"screen_name"],
                                                                 [oneItemFrom objectForKey:@"created_at"],
                                                                 img,
+                                                                [self mrGetReplarray:[oneItemFrom objectForKey:@"text"]],
                                                                 nil];
                  
-                 NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", nil];
+                 NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", @"repl", nil];
                  NSDictionary *newItem = [NSDictionary dictionaryWithObjects:theObjects forKeys:theKeys];
                  
                 
@@ -744,6 +939,7 @@
              self.mrReloader1.hidden = YES;
              
              [self.mrTimeLineTable performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+             
              [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
          }
     }];
@@ -784,9 +980,10 @@
                                                                 [[oneItemFrom objectForKey:@"user"]objectForKey:@"screen_name"],
                                                                 [oneItemFrom objectForKey:@"created_at"],
                                                                 img,
+                                                                [self mrGetReplarray:[oneItemFrom objectForKey:@"text"]],
                                                                 nil];
                  
-                 NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", nil];
+                 NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", @"repl", nil];
                  NSDictionary *newItem = [NSDictionary dictionaryWithObjects:theObjects forKeys:theKeys];
                  
                  
@@ -842,9 +1039,10 @@
                                                                  [[oneItemFrom objectForKey:@"user"]objectForKey:@"screen_name"],
                                                                  [oneItemFrom objectForKey:@"created_at"],
                                                                  img,
+                                                                 [self mrGetReplarray:[oneItemFrom objectForKey:@"text"]],
                                                                   nil];
                  
-                 NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", nil];
+                 NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", @"repl", nil];
                  NSDictionary *newItem = [NSDictionary dictionaryWithObjects:theObjects forKeys:theKeys];
                  
                  
@@ -889,9 +1087,10 @@
                                                 [[model user] screenName],
                                                 [model created_at],
                                                 img,
+                                                [self mrGetReplarray:[model text]],
                                                 nil];
                          
-                         NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", nil];
+                         NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", @"repl", nil];
                          NSDictionary *newItem = [NSDictionary dictionaryWithObjects:theObjects forKeys:theKeys];
 
                          
@@ -955,9 +1154,7 @@
 
                                                   
                      } deleteTweet:^(TSTweet *model) {
-                         
-                         
-                         
+
                          for(int i=0; i<self.mrTimelineItems.count; i++)
                          {
                              if([[[self.mrTimelineItems objectAtIndex:i]objectForKey:@"id"] isEqualToString:model.deleteTwID])
@@ -1259,20 +1456,50 @@
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     [appDelegate showSplashScreen];
     
-    [self mrGetAccessToTwitterAccounts];
+    [self mrGetAccessToTwitterAccountsAggain];
 }
 
 -(void)mrTweetCounterAction{
 
-    NSString *tweetText = self.mrAddTwittText.text;
+    int messageLimit = 140;
+    int pictureLink = 0;
     
-    int currentCounter = (140 - tweetText.length);
+    if(self.mrPictureSelector.tag == 100)
+    {
+        pictureLink = self.mrLinkLen;
+    }
     
-    if(currentCounter < 0)
-        currentCounter = 0;
+    
+    //NSString *tweetText = self.mrAddTwittText.text;
+    
+    NSString *tweetText = [self.mrAddTwittText.text stringByReplacingOccurrencesOfString:@"\n" withString:@""];
+    
+    int currentCounter = (messageLimit - (tweetText.length+pictureLink));
+    
+    /*if(currentCounter < 0)
+        currentCounter = 0;*/
     
     self.mrTweetCounter.text = [NSString stringWithFormat:@"%d",currentCounter];
     
+    
+    UIFont *font = [UIFont systemFontOfSize:10.0f];
+    NSMutableDictionary *attrsDictionary = [NSMutableDictionary dictionaryWithObject:font forKey:NSFontAttributeName];
+    
+    NSMutableParagraphStyle *paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+    [attrsDictionary setObject:paragraphStyle forKey:NSParagraphStyleAttributeName];
+    
+    /*NSString *text = @"In iOS 6 and later, this class supports multiple text styles through use of the attributedText property.";*/
+    
+    NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc] initWithString:tweetText attributes:attrsDictionary];
+    
+    if((tweetText.length + pictureLink) > messageLimit)
+    {
+        NSRange range = NSMakeRange((messageLimit - pictureLink), (tweetText.length + pictureLink) - messageLimit);
+        [attributedText addAttribute:NSForegroundColorAttributeName value:[UIColor colorWithRed:1 green:0 blue:0 alpha:1] range:range];
+    }
+    
+    self.mrAddTwittText.attributedText = attributedText;
+    self.mrAddTwittText.selectedRange = NSMakeRange(tweetText.length,0);
 }
 
 #pragma mark - Picture Select
@@ -1309,6 +1536,7 @@
         [self.mrPictureSelector setBackgroundImage:nil forState:UIControlStateNormal];
         self.uploadedImage = nil;
         self.mrAddTwittText.text = @"";
+        [self mrTweetCounterAction];
     }
     else
     {
@@ -1325,6 +1553,7 @@
     [self.mrPictureSelector setBackgroundImage:resultImage forState:UIControlStateNormal];
     self.uploadedImage = resultImage;
     self.mrPictureSelector.tag = 100;
+    [self mrTweetCounterAction];
     [self dismissModalViewControllerAnimated:YES];
 }
 
@@ -1335,6 +1564,7 @@
     
     self.mrPictureSelector.tag = 100;
     self.uploadedImage = resultImage;
+    [self mrTweetCounterAction];
     [self.mrPictureSelector setBackgroundImage:resultImage forState:UIControlStateNormal];
 }
 
@@ -1403,12 +1633,17 @@
 }
 
 - (IBAction)mrReloader1action:(id)sender {
+    self.mrReloader1.hidden = YES;
     [self refresh1];
 }
+
 - (IBAction)mrReloader2action:(id)sender {
+    self.mrReloader2.hidden = YES;
     [self refresh2];
 }
+
 - (IBAction)mrReloader3action:(id)sender {
+    self.mrReloader3.hidden = YES;
     [self refresh3];
 }
 
@@ -1432,8 +1667,26 @@
         oneTweetRow = [self.mrUserTweets objectAtIndex:btn.tag];
     }
     
-    self.mrAddTwittText.text = [NSString stringWithFormat:@"@%@ ",[oneTweetRow objectForKey:@"username"]];
+    NSMutableString *mutableReplSTR = [[NSMutableString alloc]init];
+
+    NSArray *replArray = [oneTweetRow objectForKey:@"repl"];
+    mutableReplSTR = [[NSMutableString alloc] initWithString:[NSString stringWithFormat:@"@%@",[oneTweetRow objectForKey:@"username"]]];
+   
+    
+    if(replArray.count > 0)
+    {
+        for(int i = 0; i < replArray.count; i++)
+        {
+            [mutableReplSTR appendString:[NSString stringWithFormat:@" %@",[replArray objectAtIndex:i]]];
+        }
+    }
+    
+    [mutableReplSTR appendString:@" "];
+
+    self.mrAddTwittText.text = [NSString stringWithString:mutableReplSTR];
     [self mrViewTweetView:nil];
+    
+    [mutableReplSTR release];
 }
 
 

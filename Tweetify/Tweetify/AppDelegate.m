@@ -70,6 +70,18 @@
     
     self.window.rootViewController = self.mainNavi;
     
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *result = [userDefaults objectForKey:@"settings"];
+    
+    if (![result length])
+    {
+        [userDefaults setObject:@"SETUP" forKey:@"settings"];
+        [userDefaults setObject:@"" forKey:@"mr.user.acc.name"];
+        [userDefaults synchronize];
+    }
+
+    
     [self.window makeKeyAndVisible];
     [self showSplashScreen];
     return YES;
