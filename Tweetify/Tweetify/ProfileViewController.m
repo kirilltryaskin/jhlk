@@ -296,10 +296,10 @@
     self.mrRemoveTweetBtn.tag = rowIndex;
     self.mrHeaderSectionButton.tag = rowIndex;
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         self.mrCellAva.image = [[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"ava"];
         self.mrCellTime.text = [self mrGetTimeStrFromDate:[[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"created"]];
-    });
+    //});
         
     self.mrCellName.text = [[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"name"];
     self.mrCellUserName.text = [NSString stringWithFormat:@"%@%@",@"@",[[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"username"]];

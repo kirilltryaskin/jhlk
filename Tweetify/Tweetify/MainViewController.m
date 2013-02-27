@@ -252,11 +252,11 @@
         else
             self.mrReplyTweetBtn.hidden = NO;
             
-        
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        self.mrCellRetweetLabel.text = [NSString stringWithFormat:@"%@",[[self.mrTimelineItems objectAtIndex:rowIndex]objectForKey:@"retw"]];
+        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             self.mrCellAva.image = [[self.mrTimelineItems objectAtIndex:rowIndex]objectForKey:@"ava"];
             self.mrCellTime.text = [self mrGetTimeStrFromDate:[[self.mrTimelineItems objectAtIndex:rowIndex]objectForKey:@"created"]];
-        });
+        //});
         
         cell.tag = 1;
         self.mrCellName.text = [[self.mrTimelineItems objectAtIndex:rowIndex]objectForKey:@"name"];
@@ -283,10 +283,11 @@
         else
             self.mrReplyTweetBtn.hidden = NO;
         
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+         self.mrCellRetweetLabel.text = [NSString stringWithFormat:@"%@",[[self.mrMentionsItems objectAtIndex:rowIndex]objectForKey:@"retw"]];
+        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             self.mrCellAva.image = [[self.mrMentionsItems objectAtIndex:rowIndex]objectForKey:@"ava"];
             self.mrCellTime.text = [self mrGetTimeStrFromDate:[[self.mrMentionsItems objectAtIndex:rowIndex]objectForKey:@"created"]];
-        });
+        //});
 
         cell.tag = 2;
         self.mrCellName.text = [[self.mrMentionsItems objectAtIndex:rowIndex]objectForKey:@"name"];
@@ -311,10 +312,11 @@
         else
             self.mrReplyTweetBtn.hidden = NO;
         
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+         self.mrCellRetweetLabel.text = [NSString stringWithFormat:@"%@",[[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"retw"]];
+        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             self.mrCellAva.image = [[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"ava"];
             self.mrCellTime.text = [self mrGetTimeStrFromDate:[[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"created"]];
-        });
+        //});
             
         cell.tag = 3;
         self.mrCellName.text = [[self.mrUserTweets objectAtIndex:rowIndex]objectForKey:@"name"];
@@ -367,7 +369,7 @@
 
 
 -(NSString *)mrGetTimeStrFromDate:(NSString*)date{
-
+    
     NSString *returnSTR;
     
     NSDate *nowDate = [NSDate date];
@@ -375,8 +377,13 @@
     int intNowTime = unixNowTime;
     
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    
+    NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
+    [dateFormatter setLocale:locale];
+    [locale release];
+    
     [dateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    [dateFormatter setDateFormat:@"EEE MMM d HH:mm:ss Z yyyy"];
+    [dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss Z yyyy"];
     NSDate *dateFromString = [dateFormatter dateFromString:[NSString stringWithFormat:@"%@",date]];
     [dateFormatter release];
     
@@ -415,7 +422,7 @@
         }
     
     }
-
+    
     return returnSTR;
 }
 
@@ -848,7 +855,7 @@
 }
 
 
--(NSArray *)mrGetReplarray:(NSString *)text
+-(NSArray *)mrGetReplarray:(NSString *)text:(NSString *)twUserName
 {
     NSMutableArray *replarray = [[NSMutableArray alloc]init];;
     NSString *tweetText = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
@@ -878,7 +885,12 @@
                 bufText = @"";
             }
             
-            [replarray addObject:name];
+            
+            if(![name isEqualToString:[NSString stringWithFormat:@"@%@",self.account.username]])
+            {
+                if((![replarray containsObject:name]) && (![name isEqualToString:[NSString stringWithFormat:@"@%@",twUserName]]))
+                    [replarray addObject:name];
+            }
             
             rangeUser = [bufText rangeOfString:@"@"];
         }
@@ -915,22 +927,35 @@
                  NSData *data = [NSData dataWithContentsOfURL:url];
                  UIImage *img = [[[UIImage alloc] initWithData:data] autorelease];
                  
-                 NSArray *theObjects = [NSArray arrayWithObjects:[oneItemFrom objectForKey:@"text"],
+                 NSString *tweetText;
+                 NSString *retweetText;
+                 
+                 if([oneItemFrom objectForKey:@"retweeted_status"] != nil)
+                 {
+                     tweetText = [[oneItemFrom objectForKey:@"retweeted_status"]objectForKey:@"text"];
+                     retweetText = [NSString stringWithFormat:@"Retweeted by %@", [[[oneItemFrom objectForKey:@"retweeted_status"]objectForKey:@"user"]objectForKey:@"name"]];
+                 }
+                 else
+                 {
+                     tweetText = [oneItemFrom objectForKey:@"text"];
+                     retweetText = @"";
+                 }
+                 
+                 NSArray *theObjects = [NSArray arrayWithObjects:tweetText,
                                                                  [oneItemFrom objectForKey:@"id_str"],
                                                                 [[oneItemFrom objectForKey:@"user"]objectForKey:@"name"],
                                                                 [[oneItemFrom objectForKey:@"user"]objectForKey:@"screen_name"],
                                                                 [oneItemFrom objectForKey:@"created_at"],
                                                                 img,
-                                                                [self mrGetReplarray:[oneItemFrom objectForKey:@"text"]],
+                                                                [self mrGetReplarray:[oneItemFrom objectForKey:@"text"]:[[oneItemFrom objectForKey:@"user"]objectForKey:@"screen_name"]],
+                                                                retweetText,
                                                                 nil];
                  
-                 NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", @"repl", nil];
+                 NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", @"repl", @"retw", nil];
                  NSDictionary *newItem = [NSDictionary dictionaryWithObjects:theObjects forKeys:theKeys];
                  
                 
                 [timelineMutable addObject:newItem];
-                 
-                 
              }
              
              self.mrTimelineItems = [NSMutableArray arrayWithArray:timelineMutable];
@@ -974,16 +999,32 @@
                  NSData *data = [NSData dataWithContentsOfURL:url];
                  UIImage *img = [[[UIImage alloc] initWithData:data] autorelease];
                  
-                 NSArray *theObjects = [NSArray arrayWithObjects:[oneItemFrom objectForKey:@"text"],
+                 
+                 NSString *tweetText;
+                 NSString *retweetText;
+                 
+                 if([oneItemFrom objectForKey:@"retweeted_status"] != nil)
+                 {
+                     tweetText = [[oneItemFrom objectForKey:@"retweeted_status"]objectForKey:@"text"];
+                     retweetText = [NSString stringWithFormat:@"Retweeted by %@", [[[oneItemFrom objectForKey:@"retweeted_status"]objectForKey:@"user"]objectForKey:@"name"]];
+                 }
+                 else
+                 {
+                     tweetText = [oneItemFrom objectForKey:@"text"];
+                     retweetText = @"";
+                 }
+                 
+                 NSArray *theObjects = [NSArray arrayWithObjects:tweetText,
                                                                  [oneItemFrom objectForKey:@"id_str"],
                                                                 [[oneItemFrom objectForKey:@"user"]objectForKey:@"name"],
                                                                 [[oneItemFrom objectForKey:@"user"]objectForKey:@"screen_name"],
                                                                 [oneItemFrom objectForKey:@"created_at"],
                                                                 img,
-                                                                [self mrGetReplarray:[oneItemFrom objectForKey:@"text"]],
+                                                                [self mrGetReplarray:[oneItemFrom objectForKey:@"text"]:[[oneItemFrom objectForKey:@"user"]objectForKey:@"screen_name"]],
+                                                                retweetText,
                                                                 nil];
                  
-                 NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", @"repl", nil];
+                 NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", @"repl", @"retw", nil];
                  NSDictionary *newItem = [NSDictionary dictionaryWithObjects:theObjects forKeys:theKeys];
                  
                  
@@ -1033,16 +1074,32 @@
                  NSData *data = [NSData dataWithContentsOfURL:url];
                  UIImage *img = [[[UIImage alloc] initWithData:data] autorelease];
                  
-                 NSArray *theObjects = [NSArray arrayWithObjects:[oneItemFrom objectForKey:@"text"],
+                 NSString *tweetText;
+                 NSString *retweetText;
+                 
+                 if([oneItemFrom objectForKey:@"retweeted_status"] != nil)
+                 {
+                     tweetText = [[oneItemFrom objectForKey:@"retweeted_status"]objectForKey:@"text"];
+                     retweetText = [NSString stringWithFormat:@"Retweeted by %@", [[[oneItemFrom objectForKey:@"retweeted_status"]objectForKey:@"user"]objectForKey:@"name"]];
+                 }
+                 else
+                 {
+                     tweetText = [oneItemFrom objectForKey:@"text"];
+                     retweetText = @"";
+                 }
+
+                 
+                 NSArray *theObjects = [NSArray arrayWithObjects:tweetText,
                                                                  [oneItemFrom objectForKey:@"id_str"],
                                                                  [[oneItemFrom objectForKey:@"user"]objectForKey:@"name"],
                                                                  [[oneItemFrom objectForKey:@"user"]objectForKey:@"screen_name"],
                                                                  [oneItemFrom objectForKey:@"created_at"],
                                                                  img,
-                                                                 [self mrGetReplarray:[oneItemFrom objectForKey:@"text"]],
+                                                                 [self mrGetReplarray:[oneItemFrom objectForKey:@"text"]:[[oneItemFrom objectForKey:@"user"]objectForKey:@"screen_name"]],
+                                                                 retweetText,
                                                                   nil];
                  
-                 NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", @"repl", nil];
+                 NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", @"repl", @"retw", nil];
                  NSDictionary *newItem = [NSDictionary dictionaryWithObjects:theObjects forKeys:theKeys];
                  
                  
@@ -1081,16 +1138,33 @@
                          UIImage *img = [[[UIImage alloc] initWithData:data] autorelease];
 
                          
-                         NSArray *theObjects = [NSArray arrayWithObjects:[model text],
+                         NSString *tweetText;
+                         NSString *retweetText;
+                         
+                         
+                         if([model rtwStatus] != nil)
+                         {
+                             tweetText = [[model rtwStatus] objectForKey:@"text"];
+                             retweetText = [NSString stringWithFormat:@"Retweeted by %@", [[[model rtwStatus]objectForKey:@"user"]objectForKey:@"name"]];
+                         }
+                         else
+                         {
+                             tweetText = [model text];
+                             retweetText = @"";
+                         }
+
+                         
+                         NSArray *theObjects = [NSArray arrayWithObjects:tweetText,
                                                 [model tweetID],
                                                 [[model user] name],
                                                 [[model user] screenName],
                                                 [model created_at],
                                                 img,
-                                                [self mrGetReplarray:[model text]],
+                                                [self mrGetReplarray:[model text]:[[model user] screenName]],
+                                                retweetText,
                                                 nil];
                          
-                         NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", @"repl", nil];
+                         NSArray *theKeys = [NSArray arrayWithObjects:@"text", @"id", @"name", @"username", @"created", @"ava", @"repl", @"retw", nil];
                          NSDictionary *newItem = [NSDictionary dictionaryWithObjects:theObjects forKeys:theKeys];
 
                          
@@ -1155,12 +1229,26 @@
                                                   
                      } deleteTweet:^(TSTweet *model) {
 
+                         CGFloat pageWidth = self.scroll.frame.size.width;
+                         int page = floor((self.scroll.contentOffset.x - pageWidth / 2) / pageWidth) + 1;
+
+                             
                          for(int i=0; i<self.mrTimelineItems.count; i++)
                          {
                              if([[[self.mrTimelineItems objectAtIndex:i]objectForKey:@"id"] isEqualToString:model.deleteTwID])
                              {
+                                 
                                  [self.mrTimelineItems removeObject:[self.mrTimelineItems objectAtIndex:i]];
-                                 //[self.mrTimeLineTable performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+                                 
+                                 if(page == 0)
+                                 {
+                                     [self.mrTimeLineTable deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:i inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
+                                 }
+                                 else
+                                 {
+                                     [self.mrTimeLineTable performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+                                     self.mrReloader1.hidden = YES;
+                                 }
                              }
                          }
                          
@@ -1169,7 +1257,16 @@
                              if([[[self.mrMentionsItems objectAtIndex:i]objectForKey:@"id"] isEqualToString:model.deleteTwID])
                              {
                                  [self.mrMentionsItems removeObject:[self.mrMentionsItems objectAtIndex:i]];
-                                 //[self.mrMentionsTable performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+                                 
+                                 if(page == 1)
+                                 {
+                                     [self.mrMentionsTable deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:i inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
+                                 }
+                                 else
+                                 {
+                                     [self.mrMentionsTable performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+                                     self.mrReloader2.hidden = YES;
+                                 }
                              }
                          }
                          
@@ -1178,7 +1275,16 @@
                              if([[[self.mrUserTweets objectAtIndex:i]objectForKey:@"id"] isEqualToString:model.deleteTwID])
                              {
                                  [self.mrUserTweets removeObject:[self.mrUserTweets objectAtIndex:i]];
-                                 //[self.mrUserTweetsTable performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+                                 
+                                 if(page == 2)
+                                 {
+                                     [self.mrUserTweetsTable deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:i inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
+                                 }
+                                 else
+                                 {
+                                     [self.mrUserTweetsTable performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+                                     self.mrReloader3.hidden = YES;
+                                 }
                                  
                                  self.mrAccountTweets.text = [NSString  stringWithFormat:@"%d",([[NSString stringWithFormat:@"%@",self.mrAccountTweets.text]integerValue] - 1)];
                              }
@@ -1282,6 +1388,8 @@
     [_mrTweetCounter release];
     [_mrCellAva release];
     [_mrReplyTweetBtn release];
+    [_mrSendTweetBtn release];
+    [_mrCellRetweetLabel release];
     [super dealloc];
 }
 
@@ -1318,6 +1426,8 @@
     [self setMrTweetCounter:nil];
     [self setMrCellAva:nil];
     [self setMrReplyTweetBtn:nil];
+    [self setMrSendTweetBtn:nil];
+    [self setMrCellRetweetLabel:nil];
     [super viewDidUnload];
 }
 
@@ -1469,9 +1579,6 @@
         pictureLink = self.mrLinkLen;
     }
     
-    
-    //NSString *tweetText = self.mrAddTwittText.text;
-    
     NSString *tweetText = [self.mrAddTwittText.text stringByReplacingOccurrencesOfString:@"\n" withString:@""];
     
     int currentCounter = (messageLimit - (tweetText.length+pictureLink));
@@ -1488,15 +1595,65 @@
     NSMutableParagraphStyle *paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
     [attrsDictionary setObject:paragraphStyle forKey:NSParagraphStyleAttributeName];
     
-    /*NSString *text = @"In iOS 6 and later, this class supports multiple text styles through use of the attributedText property.";*/
-    
     NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc] initWithString:tweetText attributes:attrsDictionary];
     
     if((tweetText.length + pictureLink) > messageLimit)
     {
         NSRange range = NSMakeRange((messageLimit - pictureLink), (tweetText.length + pictureLink) - messageLimit);
         [attributedText addAttribute:NSForegroundColorAttributeName value:[UIColor colorWithRed:1 green:0 blue:0 alpha:1] range:range];
+        
+        self.mrSendTweetBtn.hidden = YES;
     }
+    else
+    {
+        self.mrSendTweetBtn.hidden = NO;
+    }
+    
+    
+    // bold usernames
+    NSMutableArray *userNamesName = [[NSMutableArray alloc]init];;
+    
+    NSRange rangeUser = [tweetText rangeOfString:@"@"];
+    
+    if(rangeUser.location != NSNotFound)
+    {
+        NSString *bufText = tweetText;
+        
+        while (rangeUser.location != NSNotFound)
+        {
+            bufText = [bufText substringFromIndex:rangeUser.location];
+            
+            NSRange range = [bufText rangeOfString:@" "];
+            NSString *name;
+            
+            if (range.location != NSNotFound)
+            {
+                name = [[[NSString stringWithFormat:@"%@",bufText] substringToIndex:range.location]stringByReplacingOccurrencesOfString:@":" withString:@""];
+                bufText = [[[NSString stringWithFormat:@"%@",bufText] substringFromIndex:range.location]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+            }
+            else
+            {
+                name = [[[NSString stringWithFormat:@"%@",bufText] substringToIndex:bufText.length] stringByReplacingOccurrencesOfString:@":" withString:@""];
+                bufText = @"";
+            }
+            
+            [userNamesName addObject:name];
+            
+            rangeUser = [bufText rangeOfString:@"@"];
+        }
+    }
+    
+    NSArray *resultArray = [NSArray arrayWithArray:userNamesName];
+    [userNamesName release];
+    
+    if(resultArray.count > 0)
+    {
+        for(int i = 0; i < resultArray.count; i++)
+        {
+             [attributedText addAttribute:NSForegroundColorAttributeName value:[UIColor colorWithRed:0 green:0 blue:1 alpha:1] range:[tweetText rangeOfString:[resultArray objectAtIndex:i]]];
+        }
+    }
+    
     
     self.mrAddTwittText.attributedText = attributedText;
     self.mrAddTwittText.selectedRange = NSMakeRange(tweetText.length,0);

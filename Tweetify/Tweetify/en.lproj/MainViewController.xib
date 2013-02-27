@@ -974,6 +974,14 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">mrSendTweetBtn</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="294812233"/>
+					</object>
+					<int key="connectionID">84</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">dataSource</string>
 						<reference key="source" ref="966181576"/>
 						<reference key="destination" ref="372490531"/>
@@ -1194,8 +1202,8 @@
 						<reference key="object" ref="370244171"/>
 						<array class="NSMutableArray" key="children">
 							<reference ref="1013515122"/>
-							<reference ref="705861235"/>
 							<reference ref="1000491584"/>
+							<reference ref="705861235"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -1380,7 +1388,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">83</int>
+			<int key="maxID">84</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1475,6 +1483,7 @@
 						<string key="mrReloader3">UIButton</string>
 						<string key="mrRemoveTweetBtn">UIButton</string>
 						<string key="mrReplyTweetBtn">UIButton</string>
+						<string key="mrSendTweetBtn">UIButton</string>
 						<string key="mrTimeLineTable">UITableView</string>
 						<string key="mrTweetBtn">UIButton</string>
 						<string key="mrTweetCounter">UILabel</string>
@@ -1576,6 +1585,10 @@
 						</object>
 						<object class="IBToOneOutletInfo" key="mrReplyTweetBtn">
 							<string key="name">mrReplyTweetBtn</string>
+							<string key="candidateClassName">UIButton</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="mrSendTweetBtn">
+							<string key="name">mrSendTweetBtn</string>
 							<string key="candidateClassName">UIButton</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="mrTimeLineTable">

@@ -16,6 +16,7 @@
 - (NSString*)text;
 - (NSString*)created_at;
 - (NSString*)tweetID;
+- (NSDictionary*)rtwStatus;
 
 - (TSUser*)user;
 - (NSArray*)userMentions;

@@ -47,6 +47,11 @@
     return [self.dictionary objectForKey:@"id_str"];
 }
 
+- (NSDictionary*)rtwStatus{
+    return [self.dictionary objectForKey:@"retweeted_status"];
+}
+
+
 - (TSUser*)user {
     if (!self.cachedUser)
         self.cachedUser = [[[TSUser alloc] initWithDictionary:[self.dictionary objectForKey:@"user"]] autorelease];

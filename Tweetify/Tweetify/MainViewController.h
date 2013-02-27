@@ -40,8 +40,10 @@
 
 @property int mrLinkLen;
 
--(NSArray *)mrGetReplarray:(NSString *)text;
+-(NSArray *)mrGetReplarray:(NSString *)text:(NSString *)twUserName;
 -(void)loadUserInformation;
+@property (retain, nonatomic) IBOutlet UIButton *mrSendTweetBtn;
+@property (retain, nonatomic) IBOutlet UILabel *mrCellRetweetLabel;
 
 @property (retain, nonatomic) IBOutlet UIButton *mrDeleteTweetBtn;
 @property (retain, nonatomic) IBOutlet UIButton *mrReloader1;
